@@ -1,4 +1,5 @@
 import datetime
+import os
 from os import environ
 
 import discord
@@ -8,16 +9,16 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 TOKEN = environ.get("TOKEN", "")
+channel_id = int(environ.get("DEFAULT_CHANNEL_ID", 0))
+default_guild_id = int(environ.get("DEFAULT_GUILD_ID", ""))
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="/")
 slash = slash_commands.SlashClient(client)
 
 # TODO: make channel_id changeable
-channel_id = int(environ.get("DEFAULT_CHANNEL_ID", 0))
 channel = client.get_channel(channel_id)
 
-default_guild_id = int(environ.get("DEFAULT_GUILD_ID", ""))
 guild_ids = [default_guild_id]
 
 
@@ -35,6 +36,9 @@ async def neko(ctx):
 
 @client.event
 async def on_voice_state_update(member, before, after):
+    if before.channel == after.channel:
+        return
+
     if before.channel != None:  # When member left.
         voice_channel = before.channel
         status = "left"
